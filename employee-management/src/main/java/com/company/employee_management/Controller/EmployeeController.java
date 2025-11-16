@@ -1,35 +1,69 @@
-package com.company.employee_management.Controller;
+package com.company.employeemanagement.controller;
 
-import com.company.employee_management.model.Employee; // Import model
-import org.springframework.http.HttpStatus;
+import com.company.employee_management.model.Employee;
+import com.company.employee_management.service.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*; // Import các annotation
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
-
 @RequestMapping("/api/employees")
 public class EmployeeController {
 
-    private final List<Employee> employeeList = new ArrayList<>();
-    private final AtomicLong counter = new AtomicLong();
-    public EmployeeController() {
-        employeeList.add(new Employee(counter.incrementAndGet(), "John", "Doe", "john.doe@example.com", "IT"));
-        employeeList.add(new Employee(counter.incrementAndGet(), "Jane", "Smith", "jane.smith@example.com", "HR"));
-    }
-    @GetMapping
-    public List<Employee> getAllEmployees() {
-        return employeeList;
-    }
+    @Autowired
+    private EmployeeService employeeService; // Tiêm Service
 
     @PostMapping
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee newEmployee) {
-        newEmployee.setId(counter.incrementAndGet());
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee,
+                                                   @RequestParam Long departmentId) {
+        Employee createdEmployee = employeeService.createEmployee(employee, departmentId);
+        return ResponseEntity.ok(createdEmployee);
+    }
 
-        employeeList.add(newEmployee);
-        return new ResponseEntity<>(newEmployee, HttpStatus.CREATED);
+    @GetMapping
+    public List<Employee> getAllEmployees() {
+        // Gọi service thay vì list in-memory
+        return employeeService.getAllEmployees();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+        return employeeService.getEmployeeById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id,
+                                                   @RequestBody Employee employeeDetails) {
+        try {
+            Employee updatedEmployee = employeeService.updateEmployee(id, employeeDetails);
+            return ResponseEntity.ok(updatedEmployee);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployee(id);
+        return ResponseEntity.noContent().build(); // Trả về status 204 No Content
+    }
+
+
+    @GetMapping("/search")
+    public List<Employee> searchEmployees(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String department) {
+
+        if (name != null) {
+            return employeeService.searchEmployeesByName(name);
+        }
+        if (department != null) {
+            return employeeService.searchEmployeesByDepartment(department);
+        }
+        return employeeService.getAllEmployees();
     }
 }
