@@ -41,7 +41,10 @@ public class EmployeeWebController {
         // Trả về tên file HTML: templates/list-employees.html
         return "list-employees";
     }
-
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "login"; // Trả về login.html
+    }
     // 2. Hiển thị Form thêm mới
     @GetMapping("/add")
     public String showAddForm(Model model) {
