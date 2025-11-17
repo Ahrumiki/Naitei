@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee List</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Employee Management System</h2>
+
+    <form th:action="@{/employees/list}" method="get" class="form-inline mb-3">
+        <input class="form-control mr-sm-2" type="search" name="keyword"
+               placeholder="Search by name" th:value="${keyword}">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        <a th:href="@{/employees/list}" class="btn btn-outline-secondary ml-2">Reset</a>
+    </form>
+
+    <a th:href="@{/employees/add}" class="btn btn-primary mb-3">Add New Employee</a>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="employee : ${employees}">
+            <td th:text="${employee.id}"></td>
+            <td th:text="${employee.name}"></td>
+            <td th:text="${employee.email}"></td>
+            <td th:text="${employee.department != null} ? ${employee.department.name} : 'N/A'"></td>
+            <td>
+                <a href="#" class="btn btn-warning btn-sm">Edit</a>
+                <a href="#" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${employees.isEmpty()}" class="alert alert-warning">
+        No employees found.
+    </div>
+</div>
+
+</body>
+</html>
