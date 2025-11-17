@@ -6,6 +6,7 @@ import com.company.employee_management.repository.DepartmentRepository;
 import com.company.employee_management.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
 import java.util.List;
 
 import com.company.employee_management.exception.ResourceNotFoundException;
@@ -60,5 +61,15 @@ public class EmployeeService {
 
     public List<Employee> searchEmployeesByDepartment(String deptName) {
         return employeeRepository.findByDepartmentNameContainingIgnoreCase(deptName);
+    }
+    @Cacheable("total_employees")
+    public long countEmployees() {
+        try {
+            // Giả lập mạng chậm hoặc tính toán nặng mất 3 giây
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return employeeRepository.count(); // Hàm có sẵn của JpaRepository
     }
 }

@@ -61,4 +61,8 @@ public class EmployeeController {
         }
         return employeeService.getAllEmployees();
     }
+    @GetMapping("/count")
+    public Long countTotalEmployees() {
+        return employeeService.countEmployees();
+    }
 }
