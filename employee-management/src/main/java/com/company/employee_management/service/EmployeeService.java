@@ -7,8 +7,8 @@ import com.company.employee_management.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 
+import com.company.employee_management.exception.ResourceNotFoundException;
 @Service
 public class EmployeeService {
 
@@ -18,42 +18,41 @@ public class EmployeeService {
     @Autowired
     private DepartmentRepository departmentRepository;
 
-    // === CRUD ===
 
     public List<Employee> getAllEmployees() {
         return employeeRepository.findAll();
     }
 
-    public Optional<Employee> getEmployeeById(Long id) {
-        return employeeRepository.findById(id);
+    public Employee getEmployeeById(Long id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
     }
 
     public Employee createEmployee(Employee employee, Long departmentId) {
-        // Tìm department
         Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new RuntimeException("Error: Department not found."));
-        // Gán department cho employee
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + departmentId));
+
         employee.setDepartment(department);
-        // Lưu employee
         return employeeRepository.save(employee);
     }
 
     public Employee updateEmployee(Long id, Employee employeeDetails) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Error: Employee not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
 
         employee.setName(employeeDetails.getName());
         employee.setEmail(employeeDetails.getEmail());
-        // (Bạn có thể thêm logic cập nhật department nếu muốn)
 
         return employeeRepository.save(employee);
     }
 
     public void deleteEmployee(Long id) {
+        if (!employeeRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Employee not found with id: " + id);
+        }
         employeeRepository.deleteById(id);
     }
 
-    // === TÌM KIẾM ===
 
     public List<Employee> searchEmployeesByName(String name) {
         return employeeRepository.findByNameContainingIgnoreCase(name);

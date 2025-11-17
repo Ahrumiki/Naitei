@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
@@ -16,7 +16,7 @@ public class EmployeeController {
     private EmployeeService employeeService; // Tiêm Service
 
     @PostMapping
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee,
+    public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee,
                                                    @RequestParam Long departmentId) {
         Employee createdEmployee = employeeService.createEmployee(employee, departmentId);
         return ResponseEntity.ok(createdEmployee);
@@ -30,26 +30,21 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
-        return employeeService.getEmployeeById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Employee employee = employeeService.getEmployeeById(id);
+        return ResponseEntity.ok(employee);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Employee> updateEmployee(@PathVariable Long id,
-                                                   @RequestBody Employee employeeDetails) {
-        try {
-            Employee updatedEmployee = employeeService.updateEmployee(id, employeeDetails);
-            return ResponseEntity.ok(updatedEmployee);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+                                                   @Valid @RequestBody Employee employeeDetails) {
+        Employee updatedEmployee = employeeService.updateEmployee(id, employeeDetails);
+        return ResponseEntity.ok(updatedEmployee);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
-        return ResponseEntity.noContent().build(); // Trả về status 204 No Content
+        return ResponseEntity.noContent().build();
     }
 
 
